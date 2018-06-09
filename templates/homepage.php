@@ -27,6 +27,7 @@
                 <?php } ?>
             </h2>
             <p class="summary"><?php echo htmlspecialchars($article->summary)?></p>
+			<p class="content"><?php echo htmlspecialchars ($article->content) ?></p>
             <img id="loader-identity" src="JS/ajax-loader.gif" alt="gif">
             
             <ul class="ajax-load">

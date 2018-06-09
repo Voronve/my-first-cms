@@ -94,6 +94,9 @@ function homepage()
     $results['categories'] = array();
     foreach ( $data['results'] as $category ) { 
         $results['categories'][$category->id] = $category;
+    }
+	foreach ( $results['articles'] as $article ) { 
+        $article->content = mb_substr($article->content, 0, 50) . ' ...';
     } 
     
     $results['pageTitle'] = "Простая CMS на PHP";
