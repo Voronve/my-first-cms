@@ -36,6 +36,12 @@ class Article
     * @var string HTML содержание статьи
     */
     public $content = null;
+	
+	/**
+	 * @var int "активность статьи 1 или 0"
+	 */
+	public $active = null;
+	
     /**
     * Устанавливаем свойства с помощью значений в заданном массиве
     *
@@ -85,6 +91,13 @@ class Article
       if (isset($data['content'])) {
           $this->content = $data['content'];  
       }
+	  
+	   if (isset($data['active'])) {
+          $this->active = (int) $data['active'];  
+	  }else{
+		  $this->active = 0;
+	  }
+	  
     }
 
 
@@ -201,13 +214,14 @@ class Article
 
         // Вставляем статью
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "INSERT INTO articles ( publicationDate, categoryId, title, summary, content ) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :title, :summary, :content )";
+        $sql = "INSERT INTO articles ( publicationDate, categoryId, title, summary, content, active ) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :title, :summary, :content, :active )";
         $st = $conn->prepare ( $sql );
         $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
         $st->bindValue( ":categoryId", $this->categoryId, PDO::PARAM_INT );
         $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
         $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
         $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
+		$st->bindValue( ":active", $this->active, PDO::PARAM_INT );
         $st->execute();
         $this->id = $conn->lastInsertId();
         $conn = null;
