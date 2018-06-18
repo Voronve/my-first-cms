@@ -38,6 +38,9 @@ switch ($action) {
     case 'deleteCategory':
         deleteCategory();
         break;
+	case 'listUsers':
+		listUsers();
+		break;
     default:
         listArticles();
 }
@@ -62,14 +65,25 @@ function login() {
           header( "Location: admin.php");
 
         } else {
-
-          // Ошибка входа: выводим сообщение об ошибке для пользователя
-          $results['errorMessage'] = "Неправильный пароль, попробуйте ещё раз.";
-          require( TEMPLATE_PATH . "/admin/loginForm.php" );
+            $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
+		    $sql = "SELECT * FROM users WHERE name = :name AND pass = :pass";
+		    $prep = $conn->prepare($sql);
+		    $prep->bindValue(":name", $_POST['username'], PDO::PARAM_STR);
+		    $prep->bindValue(":pass", $_POST['password'], PDO::PARAM_STR);
+		    if($prep->execute() == true){
+			  $row = $prep->fetch();
+	          $_SESSION['username'] = $row['name'];
+			  header( "Location: admin.php");
+		    }/*else{
+			  // Ошибка входа: выводим сообщение об ошибке для пользователя
+			  $results['errorMessage'] = "Неправильный логин или пароль, попробуйте ещё раз.";
+			  require( TEMPLATE_PATH . "/admin/loginForm.php" );
+		    }*/
+			$results['errorMessage'] = "Неправильный логин или пароль, попробуйте ещё раз.";
+			require( TEMPLATE_PATH . "/admin/loginForm.php" );
         }
 
     } else {
-
       // Пользователь еще не получил форму: выводим форму
       require(TEMPLATE_PATH . "/admin/loginForm.php");
     }
