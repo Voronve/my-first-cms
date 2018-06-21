@@ -41,6 +41,15 @@ switch ($action) {
 	case 'listUsers':
 		listUsers();
 		break;
+	case 'editUser':
+		editUser();
+		break;
+	case 'deleteUser':
+		deleteUser();
+		break;
+	case 'newUser':
+		newUser();
+		break;
     default:
         listArticles();
 }
@@ -70,17 +79,25 @@ function login() {
 		    $prep = $conn->prepare($sql);
 		    $prep->bindValue(":name", $_POST['username'], PDO::PARAM_STR);
 		    $prep->bindValue(":pass", $_POST['password'], PDO::PARAM_STR);
-		    if($prep->execute() == true){
-			  $row = $prep->fetch();
-	          $_SESSION['username'] = $row['name'];
-			  header( "Location: admin.php");
-		    }/*else{
+		    $prep->execute();
+			$row = $prep->fetch();
+			if($row['name'])
+			{
+				if($row['active'])
+					{
+					$_SESSION['username'] = $row['name'];
+					header( "Location: admin.php");
+				}else{
+					$results['errorMessage'] = "Извините, но вам запрещен доступ";
+					require( TEMPLATE_PATH . "/admin/loginForm.php" );
+				}
+		    }else{
 			  // Ошибка входа: выводим сообщение об ошибке для пользователя
 			  $results['errorMessage'] = "Неправильный логин или пароль, попробуйте ещё раз.";
 			  require( TEMPLATE_PATH . "/admin/loginForm.php" );
-		    }*/
-			$results['errorMessage'] = "Неправильный логин или пароль, попробуйте ещё раз.";
-			require( TEMPLATE_PATH . "/admin/loginForm.php" );
+		    }
+			/*$results['errorMessage'] = "Неправильный логин или пароль, попробуйте ещё раз.";
+			require( TEMPLATE_PATH . "/admin/loginForm.php" );*/
         }
 
     } else {
@@ -222,7 +239,7 @@ function listCategories() {
     $data = Category::getList();
     $results['categories'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
-    $results['pageTitle'] = "Article Categories";
+    $results['pageTitle'] = "List of categories";
 
     if ( isset( $_GET['error'] ) ) {
         if ( $_GET['error'] == "categoryNotFound" ) $results['errorMessage'] = "Error: Category not found.";
@@ -317,4 +334,91 @@ function deleteCategory() {
     header( "Location: admin.php?action=listCategories&status=categoryDeleted" );
 }
 
-        
+function listUsers(){
+	$results = array();
+    $data = User::getList();
+    $results['users'] = $data['results'];
+    $results['totalRows'] = $data['totalRows'];
+    $results['pageTitle'] = "User list";
+
+    if ( isset( $_GET['error'] ) ) {
+        if ( $_GET['error'] == "usersNotFound" ) $results['errorMessage'] = "Error: User not found.";
+    }
+
+    if ( isset( $_GET['status'] ) ) {
+        if ( $_GET['status'] == "changesSaved" ) $results['statusMessage'] = "Your changes have been saved.";
+        if ( $_GET['status'] == "userDeleted" ) $results['statusMessage'] = "User deleted.";
+    }
+
+    require( TEMPLATE_PATH . "/admin/listUsers.php" );
+}
+
+function editUser() {
+
+    $results = array();
+    $results['pageTitle'] = "Edit User";
+    $results['formAction'] = "editUser";
+
+    if ( isset( $_POST['saveChanges'] ) ) {
+
+        // Admin has changed users data: save the changes
+
+        if ( !$user = User::getById( (int)$_POST['userId'] ) ) {
+          header( "Location: admin.php?action=listUsers&error=userNotFound" );
+          return;
+        }
+
+        $user->storeFormValues( $_POST );
+        $user->update();
+        header( "Location: admin.php?action=listUsers&status=changesSaved" );
+
+    } elseif ( isset( $_POST['cancel'] ) ) {
+
+        // User has cancelled his edits: return to the users list
+        header( "Location: admin.php?action=listUsers" );
+    } else {
+
+        // User has not posted the category edit form yet: display the form
+        $results['user'] = User::getById( (int)$_GET['userId'] );
+        require( TEMPLATE_PATH . "/admin/editUser.php" );
+    }
+
+}
+
+function deleteUser() {
+
+    if ( !$user = User::getById( (int)$_GET['userId'] ) ) {
+        header( "Location: admin.php?error=userNotFound" );
+        return;
+    }
+
+    $user->delete();
+    header( "Location: admin.php?status=userDeleted&action=listUsers" );
+}
+
+function newUser() {
+
+    $results = array();
+    $results['pageTitle'] = "Add new user";
+    $results['formAction'] = "newUser";
+
+    if ( isset( $_POST['saveChanges'] ) ) {
+
+        // User has posted the category edit form: save the new category
+        $category = new User;
+        $category->storeFormValues( $_POST );
+        $category->insert();
+        header( "Location: admin.php?action=listUsers&status=changesSaved" );
+
+    } elseif ( isset( $_POST['cancel'] ) ) {
+
+        // User has cancelled their edits: return to the category list
+        header( "Location: admin.php?action=listUsers" );
+    } else {
+
+        // User has not posted the category edit form yet: display the form
+        $results['user'] = new User;
+        require( TEMPLATE_PATH . "/admin/editUser.php" );
+    }
+
+}

@@ -17,36 +17,20 @@
               <th>Имя пользователя</th>
               <th>Активность</th>
             </tr>
-
-<!--<?php echo "<pre>"; print_r ($results['articles'][2]->publicationDate); echo "</pre>"; ?> Обращаемся к дате массива $results. Дата = 0 -->
             
-    <?php foreach ( $results['articles'] as $article ) { ?>
+    <?php foreach ( $results['users'] as $user ) { ?>
 
-            <tr onclick="location='admin.php?action=editArticle&amp;articleId=<?php echo $article->id?>'">
-              <td><?php echo date('j M Y', $article->publicationDate)?></td>
+            <tr onclick="location='admin.php?action=editUser&amp;userId=<?php echo $user->id?>'">
               <td>
-                <?php echo $article->title?>
+                <?php echo $user->name?>
               </td>
-              <td>
-                  
-             <!--   <?php echo $results['categories'][$article->categoryId]->name?> Эта строка была скопирована с сайта-->
-             <!-- <?php echo "<pre>"; print_r ($article); echo "</pre>"; ?> Здесь объект $article содержит в себе только ID категории. А надо по ID достать название категории-->
-            <!--<?php echo "<pre>"; print_r ($results); echo "</pre>"; ?> Здесь есть доступ к полному объекту $results -->
-             
-                <?php 
-                if(isset ($article->categoryId)) {
-                    echo $results['categories'][$article->categoryId]->name;                        
-                }
-                else {
-                echo "Без категории";
-                }?>
-              </td>
+           
 			  <td>
 			  <?php 
-				if($article->active){
-					echo 'Активна';
+				if($user->active){
+					echo 'Активен';
 				}else{
-					echo 'Неактивна';
+					echo 'Неактивен';
 				}  	  
 			  ?>
 			  </td>
@@ -56,9 +40,9 @@
 
           </table>
 
-          <p><?php echo $results['totalRows']?> article<?php echo ( $results['totalRows'] != 1 ) ? 's' : '' ?> in total.</p>
+          <p><?php echo $results['totalRows']?> user<?php echo ( $results['totalRows'] != 1 ) ? 's' : '' ?> in total.</p>
 
-          <p><a href="admin.php?action=newArticle">Add a New Article</a></p>
+          <p><a href="admin.php?action=newUser">Add a New User</a></p>
 
 <?php include "templates/include/footer.php" ?>
 

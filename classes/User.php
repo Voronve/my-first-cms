@@ -37,12 +37,15 @@ class User
       if ( isset( $data['id'] ) ) $this->id = (int) $data['id'];
       if ( isset( $data['name'] ) ) $this->name = $data['name'];
       if ( isset( $data['pass'] ) ) $this->pass = $data['pass'];
-	  if ( isset( $data['active'] ) ) $this->active = $data['active'];
-    }
+	  if ( isset( $data['active'] )) 
+	  {
+	      $this->active = $data['active'];
+	  
+	  }else{ $this->active = 0; } 
+	}
 	
 	/**
     * Устанавливаем свойства объекта с использованием значений из формы редактирования
-    *
     * @param assoc Значения из формы редактирования
     */
 
@@ -118,7 +121,7 @@ class User
       $st = $conn->prepare ( $sql );
       $st->bindValue( ":name", $this->name, PDO::PARAM_STR );
       $st->bindValue( ":pass", $this->pass, PDO::PARAM_STR );
-	  $st->bindValue( ":active", $this->pass, PDO::PARAM_INT );
+	  $st->bindValue( ":active", $this->active, PDO::PARAM_INT );
       $st->execute();
       $this->id = $conn->lastInsertId();
       $conn = null;
@@ -132,14 +135,13 @@ class User
     public function update() {
 
       // У объекта User  есть ID?
-      if ( is_null( $this->id ) ) trigger_error ( "Category::update(): Attempt to update a User object that does not have its ID property set.", E_USER_ERROR );
+      if ( is_null( $this->id ) ) trigger_error ( "User::update(): Attempt to update a User object that does not have its ID property set.", E_USER_ERROR );
 
       // Обновляем данные пользователя
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-      $sql = "UPDATE categories SET name=:name, pass=:pass, active=:active WHERE id = :id";
+      $sql = "UPDATE users SET name=:name, active=:active WHERE id = :id";
       $st = $conn->prepare ( $sql );
       $st->bindValue( ":name", $this->name, PDO::PARAM_STR );
-      $st->bindValue( ":pass", $this->pass, PDO::PARAM_STR );
 	  $st->bindValue( ":active", $this->active, PDO::PARAM_INT);
       $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
       $st->execute();
