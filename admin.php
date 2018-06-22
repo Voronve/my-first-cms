@@ -343,6 +343,7 @@ function listUsers(){
 
     if ( isset( $_GET['error'] ) ) {
         if ( $_GET['error'] == "usersNotFound" ) $results['errorMessage'] = "Error: User not found.";
+		if ( $_GET['error'] == "userExist" ) $results['errorMessage'] = "Error: User with such name is alredy exist.";
     }
 
     if ( isset( $_GET['status'] ) ) {
@@ -404,11 +405,15 @@ function newUser() {
 
     if ( isset( $_POST['saveChanges'] ) ) {
 
-        // User has posted the category edit form: save the new category
+        // User has added a new user - the change is saved
         $category = new User;
-        $category->storeFormValues( $_POST );
-        $category->insert();
-        header( "Location: admin.php?action=listUsers&status=changesSaved" );
+		if (User::isUserExist($_POST['name'])){
+			header( "Location: admin.php?action=listUsers&error=userExist" );
+		}else{
+			$category->storeFormValues( $_POST );
+			$category->insert();
+			header( "Location: admin.php?action=listUsers&status=changesSaved" );
+		}
 
     } elseif ( isset( $_POST['cancel'] ) ) {
 

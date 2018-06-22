@@ -106,6 +106,19 @@ class User
 		return ( array ( "results" => $list, "totalRows" => $totalRows[0] ) );
     }
 	
+	public static function isUserExist($login){
+		$conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD);
+		$sql = "SELECT name FROM users WHERE name = :name";
+		$st= $conn->prepare($sql);
+		$st->bindValue( ":name", $login, PDO::PARAM_STR );
+		$st->execute();
+		if( $st->fetch()[0]){
+			return true;
+		}else{
+			return false;
+		}
+	} 
+	
 	/**
     * Вставляем текущий объект User в базу данных и устанавливаем его свойство ID.
     */
