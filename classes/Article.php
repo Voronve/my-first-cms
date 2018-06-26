@@ -158,13 +158,16 @@ class Article
             $categoryId=null, $order="publicationDate DESC") 
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
-        $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : "";
-		$onlyActive = $numRows < 1000000 ? "WHERE active = 1" : "";
+        $categoryClause = $categoryId ? "WHERE categoryId = $categoryId" : "";
+		if($categoryClause){
+			$onlyActive = $numRows < 1000000 ? "AND active = 1" : "";
+		}else{
+			$onlyActive = $numRows < 1000000 ? "WHERE active = 1" : "";
+		}
         $sql = "SELECT SQL_CALC_FOUND_ROWS *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
                 FROM articles $categoryClause $onlyActive
                 ORDER BY  $order  LIMIT :numRows";
-        
         $st = $conn->prepare($sql);
 //                        echo "<pre>";
 //                        print_r($st);
@@ -172,8 +175,8 @@ class Article
 //                        Здесь $st - текст предполагаемого SQL-запроса, причём переменные не отображаются
         $st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
         
-        if ($categoryId) 
-            $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);
+        /*if ($categoryId) 
+            $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);*/
         
         $st->execute(); // выполняем запрос к базе данных
 //                        echo "<pre>";
