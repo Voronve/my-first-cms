@@ -38,6 +38,18 @@ switch ($action) {
     case 'deleteCategory':
         deleteCategory();
         break;
+	case 'listSubcategories':
+        listSubcategories();
+        break;
+    case 'newSubcategory':
+        newSubcategory();
+        break;
+    case 'editSubcategory':
+        editSubcategory();
+        break;
+    case 'deleteSubcategory':
+        deleteSubcategory();
+        break;
 	case 'listUsers':
 		listUsers();
 		break;
@@ -332,6 +344,66 @@ function deleteCategory() {
 
     $category->delete();
     header( "Location: admin.php?action=listCategories&status=categoryDeleted" );
+}
+
+function listSubcategories() {
+    $results = array();
+    $data = Subcategory::getList();
+    $results['subcategories'] = $data['results'];
+    $results['totalRows'] = $data['totalRows'];
+    $results['pageTitle'] = "List of subcategories";
+	//Извлекаем название категории по Id
+	foreach ($results['subcategories'] as $subcategory){
+		$category = Category::getById($subcategory->cat_id);
+		$subcategory->cat_name = $category->name;
+	}
+	/*print_r($results['subcategories'][0]->cat_name);die;*/
+    if ( isset( $_GET['error'] ) ) {
+        if ( $_GET['error'] == "subcategoryNotFound" ) $results['errorMessage'] = "Error: Subcategory not found.";
+        if ( $_GET['error'] == "subcategoryContainsArticles" ) $results['errorMessage'] = "Error: Subcategory contains articles. Delete the articles, or assign them to another subcategory, before deleting this subcategory.";
+    }
+
+    if ( isset( $_GET['status'] ) ) {
+        if ( $_GET['status'] == "changesSaved" ) $results['statusMessage'] = "Your changes have been saved.";
+        if ( $_GET['status'] == "categoryDeleted" ) $results['statusMessage'] = "Subcategory deleted.";
+    }
+
+    require( TEMPLATE_PATH . "/admin/listSubcategories.php" );
+}
+
+function newSubcategory() {
+
+    $results = array();
+    $results['pageTitle'] = "New Article Subcategory";
+    $results['formAction'] = "newSubcategory";
+
+    if ( isset( $_POST['saveChanges'] ) ) {
+		//Находим идентификатор категории по её названию в форме
+		$_POST['cat_id'] = Subcategory::getCategIdByName($_POST['category']);
+        // User has posted the subcategory edit form: save the new subcategory
+        $subcategory = new Subcategory;
+        $subcategory->storeFormValues( $_POST );
+        $subcategory->insert();
+        header( "Location: admin.php?action=listSubcategories&status=changesSaved" );
+
+    } elseif ( isset( $_POST['cancel'] ) ) {
+
+        // User has cancelled their edits: return to the category list
+        header( "Location: admin.php?action=listSubcategories" );
+    } else {
+
+        // User has not posted the category edit form yet: display the form
+        $results['subcategory'] = new Subcategory;
+		$categories = Category::getList();
+		$catname = array();
+		foreach($categories['results'] as $category){
+			$catname[] = $category->name;
+		}
+		/*print_r($catname);die;*/
+		
+        require( TEMPLATE_PATH . "/admin/editSubcategory.php" );
+    }
+
 }
 
 function listUsers(){
