@@ -15,7 +15,7 @@
 
           <li>
             <label for="name">Subcategory Name</label>
-            <input type="text" name="name" id="name" placeholder="Name of the category" required autofocus maxlength="255" value="<?php echo htmlspecialchars( $results['subcategory']->name )?>" />
+            <input type="text" name="name" id="name" placeholder="Name of the subcategory" required autofocus maxlength="255" value="<?php echo htmlspecialchars( $results['subcategory']->name )?>" />
           </li>
 
           <li>

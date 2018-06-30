@@ -16,7 +16,8 @@
             <tr>
               <th>Publication Date</th>
               <th>Article</th>
-              <th>Category</th>
+			  <th>Subcategory</th>
+			  <th>Category</th>
 			  <th>Activeness</th>
             </tr>
 
@@ -29,6 +30,15 @@
               <td>
                 <?php echo $article->title?>
               </td>
+			  <td>
+				<?php 
+                if(isset ($article->subcategoryId)) {
+                    echo $results['subcategories'][$article->subcategoryId]->name;                        
+                }
+                else {
+                echo "Без категории";
+                }?>
+			  </td>
               <td>
                   
              <!--   <?php echo $results['categories'][$article->categoryId]->name?> Эта строка была скопирована с сайта-->
@@ -37,7 +47,7 @@
              
                 <?php 
                 if(isset ($article->categoryId)) {
-                    echo $results['categories'][$article->categoryId]->name;                        
+                    echo $results['categories'][$article->subcategoryId]->name;                        
                 }
                 else {
                 echo "Без категории";

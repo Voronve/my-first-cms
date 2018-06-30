@@ -20,7 +20,7 @@
 
         <?php foreach ( $results['subcategories'] as $subcategory ) { ?>
 
-                <tr onclick="location='admin.php?action=editSubcategory&amp;categoryId=<?php echo $subcategory->id?>'">
+                <tr onclick="location='admin.php?action=editSubcategory&amp;subcategoryId=<?php echo $subcategory->id?>'">
                     <td>
                         <?php echo $subcategory->name?>
                     </td>

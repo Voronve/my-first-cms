@@ -26,6 +26,11 @@ class Article
     * @var int ID категории статьи
     */
     public $categoryId = null;
+	
+	/**
+	 * @var int ID подкатегории статьи 
+	 */
+	public $subcategoryId = null;
 
     /**
     * @var string Краткое описание статьи
@@ -82,6 +87,10 @@ class Article
       
       if (isset($data['categoryId'])) {
           $this->categoryId = (int) $data['categoryId'];      
+      }
+	  
+	  if (isset($data['subcategoryId'])) {
+          $this->subcategoryId = (int) $data['subcategoryId'];      
       }
       
       if (isset($data['summary'])) {
@@ -155,10 +164,15 @@ class Article
     * @return Array|false Двух элементный массив: results => массив объектов Article; totalRows => общее количество строк
     */
     public static function getList($numRows=1000000, 
-            $categoryId=null, $order="publicationDate DESC") 
+            $categoryId=null, $isSubcategory=null, $order="publicationDate DESC") 
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
-        $categoryClause = $categoryId ? "WHERE categoryId = $categoryId" : "";
+		if(!$isSubcategory){
+			$categoryClause = $categoryId ? "WHERE categoryId = $categoryId" : "";
+		}else{
+			$categoryClause = $categoryId ? "WHERE subcategoryId = $categoryId" : "";
+		}
+        
 		if($categoryClause){
 			$onlyActive = $numRows < 1000000 ? "AND active = 1" : "";
 		}else{
@@ -174,9 +188,6 @@ class Article
 //                        echo "</pre>";
 //                        Здесь $st - текст предполагаемого SQL-запроса, причём переменные не отображаются
         $st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
-        
-        /*if ($categoryId) 
-            $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);*/
         
         $st->execute(); // выполняем запрос к базе данных
 //                        echo "<pre>";

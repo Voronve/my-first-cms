@@ -90,11 +90,13 @@ class Subcategory
 	 * @return array|false возвращаем либо неудачу либо массив из 2-х элементов:
 	 * массив с искомыми объектами субкатегорий и их количество  
 	 */
-	public static function getList($numRows=1000000, $order="name ASC")
+	public static function getList($numRows=1000000, $categoryId=null, $order="name ASC")
 	{
 		$conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
 		
-		$sql = "SELECT * FROM subcategories ORDER BY $order LIMIT :numRows";
+		$categoryClause = $categoryId ? "WHERE cat_id = $categoryId" : "";
+		
+		$sql = "SELECT * FROM subcategories $categoryClause ORDER BY $order LIMIT :numRows";
 		
 		$st= $conn->prepare($sql);
 		$st->bindValue(":numRows", $numRows, PDO::PARAM_INT );
@@ -150,17 +152,18 @@ class Subcategory
 	
 	public function update(){
 		// Проверяем есть ли уже у обьекта Subcategory ID ?
-		if ( !is_null( $this->id ) ) trigger_error ( "Subcategory::insert(): Attempt to insert a Subcategory object that already has its ID property set (to $this->id).", E_USER_ERROR );
+		if ( is_null( $this->id ) ) trigger_error ( "Subcategory::insert(): Attempt to insert a Subcategory object that does not have its ID property set (to $this->id).", E_USER_ERROR );
 	    $conn = new PDO (DB_DSN, DB_USERNAME, DB_PASSWORD );
 		$sql = "UPDATE subcategories SET name=:name, cat_id=:cat_id WHERE id=:id";
 		$st = $conn->prepare($sql);
 		$st->bindValue(":name", $this->name, PDO::PARAM_STR);
-		$st->bindValue(":name", $this->cat_id, PDO::PARAM_INT);
+		$st->bindValue(":cat_id", $this->cat_id, PDO::PARAM_INT);
+		$st->bindValue(":id", $this->id, PDO::PARAM_INT);
 		$st->execute();
 		$conn = null;
 	}
 	
-	public function delate(){
+	public function delete(){
 		// У объекта Subcategory  есть ID?
       if ( is_null( $this->id ) ) trigger_error ( "Subcategory::delete(): Attempt to delete a Subcategory object that does not have its ID property set.", E_USER_ERROR );
 
