@@ -13,17 +13,23 @@
                     <?php echo htmlspecialchars( $article->title )?>
                 </a>
                 
-                <?php if (isset($article->categoryId)) { ?>
+                <?php if (isset($article->subcategoryId)) { ?>
+					<span class="category">
+                        in category
+                        <a href=".?action=archiveCat&amp;subcategoryId=<?php echo $article->subcategoryId?>">
+                            <?php echo htmlspecialchars($results['categories'][$article->subcategoryId]->name )?>
+                        </a>
+                    </span>
                     <span class="category">
-                        in 
-                        <a href=".?action=archive&amp;categoryId=<?php echo $article->categoryId?>">
-                            <?php echo htmlspecialchars($results['categories'][$article->categoryId]->name )?>
+                        in subcategory
+                        <a href=".?action=archiveSubcat&amp;subcategoryId=<?php echo $article->subcategoryId?>">
+                            <?php echo htmlspecialchars($results['subcategories'][$article->subcategoryId]->name )?>
                         </a>
                     </span>
                 <?php } 
                 else { ?>
-                    <span class="category">
-                        <?php echo "Без категории"?>
+                    <span class="subcategory">
+                        <?php echo "Без субкатегории"?>
                     </span>
                 <?php } ?>
             </h2>

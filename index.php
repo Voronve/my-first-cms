@@ -17,8 +17,11 @@ function initApplication()
     $action = isset($_GET['action']) ? $_GET['action'] : "";
 
     switch ($action) {
-        case 'archive':
-          archive();
+        case 'archiveSubcat':
+          archiveSubcat();
+          break;
+	  case 'archiveCat':
+          archiveCat();
           break;
         case 'viewArticle':
           viewArticle();
@@ -28,29 +31,55 @@ function initApplication()
     }
 }
 
-function archive() 
+function archiveSubcat() 
 {
     $results = [];
     
-    $categoryId = ( isset( $_GET['categoryId'] ) && $_GET['categoryId'] ) ? (int)$_GET['categoryId'] : null;
+    $subcategoryId = ( isset( $_GET['subcategoryId'] ) && $_GET['subcategoryId'] ) ? (int)$_GET['subcategoryId'] : null;
+    $results['category'] = 0;
+    $results['subcategory'] = Subcategory::getById( $subcategoryId );
     
-    $results['category'] = Category::getById( $categoryId );
-    
-    $data = Article::getList( 100000, $results['category'] ? $results['category']->id : null );
+    $data = Article::getList( 100000, $results['subcategory'] ? $results['subcategory']->id : null, true );
     
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
     
-    $data = Category::getList();
-    $results['categories'] = array();
+    $data = Subcategory::getList();
+    $results['subcategories'] = array();
     
-    foreach ( $data['results'] as $category ) {
-        $results['categories'][$category->id] = $category;
+    foreach ( $data['results'] as $subcategory ) {
+        $results['subcategories'][$subcategory->id] = $subcategory;
     }
     
-    $results['pageHeading'] = $results['category'] ?  $results['category']->name : "Article Archive";
+    $results['pageHeading'] = $results['subcategory'] ?  $results['subcategory']->name : "Article Archive";
     $results['pageTitle'] = $results['pageHeading'] . " | Widget News";
     
+    require( TEMPLATE_PATH . "/archive.php" );
+}
+
+function archiveCat() 
+{
+    $results = [];
+    
+    $subcategoryId = ( isset( $_GET['subcategoryId'] ) && $_GET['subcategoryId'] ) ? (int)$_GET['subcategoryId'] : null;
+    
+    $results['subcategory'] = Subcategory::getById( $subcategoryId );
+	$results['category'] = Category::getById( $results['subcategory']->cat_id );
+	$data = Subcategory::getList(1000000, $results['subcategory']->cat_id);
+	$articleArr = array();
+	foreach($data['results'] as $subcategory){
+		$articleArr[] = Article::getList(1000000, $subcategory->id, true);
+		
+	}
+	
+	$results['articles'] = array();
+	$results['totalRows'] = 0;
+	for( $i = 0; $i < count($articleArr); $i++){
+		$results['articles'] = array_merge($results['articles'], $articleArr[$i]['results']);
+		$results['totalRows'] = $results['totalRows'] + $articleArr[$i]['totalRows'];
+	}
+	$results['pageHeading'] = $results['category'] ?  $results['category']->name : "Article Archive";
+	
     require( TEMPLATE_PATH . "/archive.php" );
 }
 
@@ -74,7 +103,7 @@ function viewArticle()
         throw new Exception("Статья с id = $articleId не найдена");
     }
     
-    $results['category'] = Category::getById($results['article']->categoryId);
+    $results['subcategory'] = Subcategory::getById($results['article']->subcategoryId);
     $results['pageTitle'] = $results['article']->title . " | Простая CMS";
     
     require(TEMPLATE_PATH . "/viewArticle.php");
@@ -89,11 +118,11 @@ function homepage()
     $data = Article::getList(HOMEPAGE_NUM_ARTICLES);
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
-    
-    $data = Category::getList();
-    $results['categories'] = array();
-    foreach ( $data['results'] as $category ) { 
-        $results['categories'][$category->id] = $category;
+    $data = Subcategory::getList();
+    $results['subcategories'] = array();
+    foreach ( $data['results'] as $subcategory ) { 
+        $results['subcategories'][$subcategory->id] = $subcategory;
+		$results['categories'][$subcategory->id] = Category::getById($subcategory->cat_id);
     }
 	foreach ( $results['articles'] as $article ) { 
         $article->content = mb_substr($article->content, 0, 50) . ' ...';

@@ -36,7 +36,7 @@
                     echo $results['subcategories'][$article->subcategoryId]->name;                        
                 }
                 else {
-                echo "Без категории";
+                echo "Без субкатегории";
                 }?>
 			  </td>
               <td>
@@ -46,7 +46,7 @@
             <!--<?php echo "<pre>"; print_r ($results); echo "</pre>"; ?> Здесь есть доступ к полному объекту $results -->
              
                 <?php 
-                if(isset ($article->categoryId)) {
+                if(isset ($article->subcategoryId)) {
                     echo $results['categories'][$article->subcategoryId]->name;                        
                 }
                 else {

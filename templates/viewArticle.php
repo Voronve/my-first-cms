@@ -5,13 +5,12 @@
     <div style="width: 75%;"><?php echo $results['article']->content?></div>
     <p class="pubDate">Published on <?php  echo date('j F Y', $results['article']->publicationDate)?>
     
-    <?php if ( $results['category'] ) { ?>
-        in 
-        <a href="./?action=archive&amp;categoryId=<?php echo $results['category']->id?>">
-            <?php echo htmlspecialchars($results['category']->name) ?>
+    <?php if ( $results['subcategory'] ) { ?>
+        in subcategory
+        <a href="./?action=archiveSubcat&amp;subcategoryId=<?php echo $results['subcategory']->id?>">
+            <?php echo htmlspecialchars($results['subcategory']->name) ?>
         </a>
-    <?php } ?>
-        
+    <?php } ?> 
     </p>
 
     <p><a href="./">Вернуться на главную страницу</a></p>
