@@ -20,8 +20,11 @@ function initApplication()
         case 'archiveSubcat':
           archiveSubcat();
           break;
-	  case 'archiveCat':
+	    case 'archiveCat':
           archiveCat();
+          break;
+		case 'archive':
+          archive();
           break;
         case 'viewArticle':
           viewArticle();
@@ -68,7 +71,7 @@ function archiveCat()
 	$data = Subcategory::getList(1000000, $results['subcategory']->cat_id);
 	$articleArr = array();
 	foreach($data['results'] as $subcategory){
-		$articleArr[] = Article::getList(1000000, $subcategory->id, true);
+		$articleArr[] = Article::getList(100000, $subcategory->id, true);
 		
 	}
 	
@@ -83,6 +86,27 @@ function archiveCat()
     require( TEMPLATE_PATH . "/archive.php" );
 }
 
+function archive() 
+{
+    $results = [];
+    $data = Article::getList(100000);
+    
+    $results['articles'] = $data['results'];
+    $results['totalRows'] = $data['totalRows'];
+    $results['category'] = 0;
+	$results['subcategory'] = 0;
+    $data = Subcategory::getList();
+    $results['subcategories'] = array();
+    
+    foreach ( $data['results'] as $subcategory ) {
+        $results['subcategories'][$subcategory->id] = $subcategory;
+    }
+    
+    $results['pageHeading'] = "Article Archive";
+    $results['pageTitle'] = $results['pageHeading'] . " | Widget News";
+    
+    require( TEMPLATE_PATH . "/archive.php" );
+}
 /**
  * Загрузка страницы с конкретной статьёй
  * 
@@ -129,11 +153,6 @@ function homepage()
     } 
     
     $results['pageTitle'] = "Простая CMS на PHP";
-    
-//    echo "<pre>";
-//    print_r($data);
-//    echo "</pre>";
-//    die();
     
     require(TEMPLATE_PATH . "/homepage.php");
     

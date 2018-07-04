@@ -20,9 +20,15 @@
                     </a>
 
                     <?php if ( !$results['subcategory'] && $article->subcategoryId ) { ?>
+					<span class="category">
+                        in 
+                        <a href=".?action=archiveCat&amp;subcategoryId=<?php echo $article->subcategoryId?>">
+                            <?php echo htmlspecialchars( Category::getById($results['subcategories'][$article->subcategoryId]->cat_id)->name ) ?>
+                        </a>
+                    </span>
                     <span class="category">
                         in 
-                        <a href=".?action=archive&amp;subcategoryId=<?php echo $article->subcategoryId?>">
+                        <a href=".?action=archiveSubcat&amp;subcategoryId=<?php echo $article->subcategoryId?>">
                             <?php echo htmlspecialchars( $results['subcategories'][$article->subcategoryId]->name ) ?>
                         </a>
                     </span>

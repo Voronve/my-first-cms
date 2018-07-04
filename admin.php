@@ -181,6 +181,10 @@ function editArticle() {
             header( "Location: admin.php?error=articleNotFound" );
             return;
         }
+		if($_POST['categoryId'] != Subcategory::getById($_POST['subcategoryId'])->cat_id ){
+			header( "Location: admin.php?error=CategoryNotMatch" );
+            return;
+		}
 
         $article->storeFormValues( $_POST );
         $article->update();
@@ -194,11 +198,12 @@ function editArticle() {
 
         // Пользвоатель еще не получил форму редактирования: выводим форму
         $results['article'] = Article::getById((int)$_GET['articleId']);
-        $data = Category::getList();
-        $results['categories'] = $data['results'];
+        $data = Subcategory::getList();
+        $results['subcategories'] = $data['results'];
+		$data = Category::getList();
+		$results['categories'] = $data['results'];
         require(TEMPLATE_PATH . "/admin/editArticle.php");
     }
-
 }
 
 
@@ -228,17 +233,14 @@ function listArticles() {
 		$results['categories'][$subcategory->id] = Category::getById($subcategory->cat_id);
     }
 	
-	/*$data = Category::getList();
-    $results['categories'] = array();
-    foreach ($data['results'] as $category) { 
-        $results['categories'][$category->id] = $category;
-	}*/
-	
     $results['pageTitle'] = "Все статьи";
 
     if (isset($_GET['error'])) { // вывод сообщения об ошибке (если есть)
-        if ($_GET['error'] == "articleNotFound") 
+        if ($_GET['error'] == "articleNotFound"){ 
             $results['errorMessage'] = "Error: Article not found.";
+		}elseif($_GET['error'] == "CategoryNotMatch"){
+			$results['errorMessage'] = "Error: Category doesn't match to subcategory";
+		}
     }
 
     if (isset($_GET['status'])) { // вывод сообщения (если есть)

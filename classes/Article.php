@@ -85,10 +85,6 @@ class Article
           $this->title = $data['title'];        
       }
       
-      if (isset($data['categoryId'])) {
-          $this->categoryId = (int) $data['categoryId'];      
-      }
-	  
 	  if (isset($data['subcategoryId'])) {
           $this->subcategoryId = (int) $data['subcategoryId'];      
       }
@@ -255,12 +251,12 @@ class Article
       // Обновляем статью
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $sql = "UPDATE articles SET publicationDate=FROM_UNIXTIME(:publicationDate),"
-              . " categoryId=:categoryId, title=:title, summary=:summary,"
+              . " subcategoryId=:subcategoryId, title=:title, summary=:summary,"
               . " content=:content, active=:active WHERE id = :id";
       
       $st = $conn->prepare ( $sql );
       $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
-      $st->bindValue( ":categoryId", $this->categoryId, PDO::PARAM_INT );
+      $st->bindValue( ":subcategoryId", $this->subcategoryId, PDO::PARAM_INT );
       $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
       $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
       $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
