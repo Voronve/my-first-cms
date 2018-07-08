@@ -1,32 +1,22 @@
 <?php
 /**
- *  Класс для работы с зарегистрированными пользователями
+ *  Класс для работы с авторством статей
  */
 
-class User
+class Connection
 {
 	//Свойства
 	/**
-    * @var int ID пользователя из базы данных
+    * @var int ID статьи 
     */
 	
-	public $id = null;
+	public $articleId = null;
 	
 	/**
-    * @var string Имя пользователя
+    * @var int ID автора статьи
     */
-    public $name = null;
-	
-	/**
-    * @var string пароль пользователя
-    */
-    public $pass = null;
-	
-	/**
-    * @var bool индикатор, показывающий активен пользователь или нет 
-    */
-    public $active = null;
-	
+    public $userId = null;
+		
 	/**
     * Устанавливаем свойства объекта с использованием значений в передаваемом массиве
     *
@@ -34,14 +24,9 @@ class User
     */
 	
 	public function __construct( $data=array() ) {
-      if ( isset( $data['id'] ) ) $this->id = (int) $data['id'];
-      if ( isset( $data['name'] ) ) $this->name = $data['name'];
-      if ( isset( $data['pass'] ) ) $this->pass = $data['pass'];
-	  if ( isset( $data['active'] )) 
-	  {
-	      $this->active = $data['active'];
-	  
-	  }else{ $this->active = 0; } 
+      if ( isset( $data['articleId'] ) ) $this->articleId = (int) $data['articleId'];
+      if ( isset( $data['userId'] ) ) $this->userId = $data['userId'];
+      
 	}
 	
 	/**
@@ -56,23 +41,26 @@ class User
     }
 	
 	/**
-    * Возвращаем объект User, соответствующий заданному ID
+    * Возвращаем объекты Connection, соответствующие заданному ID статьи
     *
-    * @param int ID пользователя
-    * @return  User|false Объект User object или false, если запись не была найдена или в случае другой ошибки
+    * @param int $articleId ID статьи
+    * @return  Array|false Массив объектов Connection object или false, если записи не были найдены или в случае другой ошибки
     */
 
-    public static function getById( $id ) 
+    public static function getByArticleId( $articleId ) 
     {
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "SELECT * FROM users WHERE id = :id";
+        $sql = "SELECT * FROM connections WHERE article_id = :article_id";
         $st = $conn->prepare( $sql );
-        $st->bindValue(":id", $id, PDO::PARAM_INT);
+        $st->bindValue(":article_id", $articleId, PDO::PARAM_INT);
         $st->execute();
-        $row = $st->fetch();
+		$list = array();
+		while ($row = $st->fetch()){
+			$connection = new Connection($row);
+			$list[] = $connection;
+		}
         $conn = null;
-        if ($row) 
-            return new User($row);
+		return $list;
     }
 	
 	/**
@@ -82,7 +70,7 @@ class User
     * @param string Optional Столбец, по которому сортируются категории(по умолчанию = "name ASC")
     * @return Array|false Двух элементный массив: results => массив с объектами User; totalRows => общее количество пользователей
     */
-    public static function getList( $numRows=1000000, $order="name ASC" ) 
+    public static function getList( $numRows=1000000, $order="article_id" ) 
     {
 		$conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD);
     
@@ -179,4 +167,3 @@ class User
       $conn = null;
     }	
 }
-
