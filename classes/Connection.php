@@ -34,7 +34,8 @@ class Connection
     * @param assoc Значения из формы редактирования
     */
 
-    public function storeFormValues ( $params ) {
+    public function storeFormValues ( $params ) 
+	{
 
       // Store all the parameters
       $this->__construct( $params );
@@ -70,7 +71,7 @@ class Connection
     * @param string Optional Столбец, по которому сортируются категории(по умолчанию = "name ASC")
     * @return Array|false Двух элементный массив: results => массив с объектами User; totalRows => общее количество пользователей
     */
-    public static function getList( $numRows=1000000, $order="article_id" ) 
+    /*public static function getList( $numRows=1000000, $order="article_id" ) 
     {
 		$conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD);
     
@@ -105,40 +106,39 @@ class Connection
 		}else{
 			return false;
 		}
-	} 
+	} */
 	
 	/**
-    * Вставляем текущий объект User в базу данных и устанавливаем его свойство ID.
+    * Добавляем новую связь между юзером и статьей
     */
 
-    public function insert() {
+    public function insert() 
+	{
 
-      // У объекта User уже есть ID?
-      if ( !is_null( $this->id ) ) trigger_error ( "Category::insert(): Attempt to insert a User object that already has its ID property set (to $this->id).", E_USER_ERROR );
+      // У объекта Connection уже есть ID статьи и пользователя?
+      if ( !is_null( $this->article_id && $this->user_id ) ) trigger_error ( "Category::insert(): Attempt to insert a User object that already has its key properties set (to $this->article_id and $this->user_id).", E_USER_ERROR );
 
-      // Вставляем нового пользователя
+      // Вставляем новую связь 
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-      $sql = "INSERT INTO users ( name, pass, active ) VALUES ( :name, :pass, :active )";
+      $sql = "INSERT INTO connections ( article_id, user_id) VALUES ( :article_id, :user_id )";
       $st = $conn->prepare ( $sql );
-      $st->bindValue( ":name", $this->name, PDO::PARAM_STR );
-      $st->bindValue( ":pass", $this->pass, PDO::PARAM_STR );
-	  $st->bindValue( ":active", $this->active, PDO::PARAM_INT );
+      $st->bindValue( ":article_id", $this->articleId, PDO::PARAM_INT );
+      $st->bindValue( ":user_id", $this->userId, PDO::PARAM_INT );
       $st->execute();
-      $this->id = $conn->lastInsertId();
       $conn = null;
     }
 
 
     /**
-    * Обновляем текущий объект User в базе данных.
+    * Обновляем текущий объект Connection в базе данных.
     */
 
-    public function update() {
+    /*public function update() {
 
-      // У объекта User  есть ID?
-      if ( is_null( $this->id ) ) trigger_error ( "User::update(): Attempt to update a User object that does not have its ID property set.", E_USER_ERROR );
+      // У объекта Connection есть ID статьи и пользователя?
+      if ( is_null( $this->article_id && $this->user_id ) ) trigger_error ( "Category::update(): Attempt to update a User object that does not have its key properties set.", E_USER_ERROR );
 
-      // Обновляем данные пользователя
+      // Обновляем связь
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $sql = "UPDATE users SET name=:name, active=:active WHERE id = :id";
       $st = $conn->prepare ( $sql );
@@ -147,22 +147,25 @@ class Connection
       $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
       $st->execute();
       $conn = null;
-    }
+    }*/
 
 
     /**
-    * Удаляем текущий объект User из базы данных.
+    * Удаляем текущий объект Connection из базы данных.
     */
 
-    public function delete() {
+    public function delete() 
+	{
 
       // У объекта User  есть ID?
-      if ( is_null( $this->id ) ) trigger_error ( "Category::delete(): Attempt to delete a User object that does not have its ID property set.", E_USER_ERROR );
+      if ( is_null( $this->article_id && $this->user_id ) ) trigger_error ( "Category::delete(): Attempt to delete a User object that does not have its its key properties set.", E_USER_ERROR );
 
-      // Удаляем пользователя
+      // Удаляем связь
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-      $st = $conn->prepare ( "DELETE FROM users WHERE id = :id LIMIT 1" );
-      $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
+      $st = $conn->prepare ( "DELETE FROM connections WHERE article_id = :article_id "
+			  . "AND user_id = :user_id LIMIT 1" );
+      $st->bindValue( ":article_id", $this->articleId, PDO::PARAM_INT );
+	  $st->bindValue( ":article_id", $this->userId, PDO::PARAM_INT );
       $st->execute();
       $conn = null;
     }	

@@ -52,9 +52,8 @@ echo "<pre>";
 			</select>
 		</li>
 		<li>
-			<label for="authorsNames">Authors names</label>
-			<select name="authorsNames">
-				<option value="0">(none)</option>
+			<label for="authorsNames[]">Authors names</label>
+			<select name="authorsNames[]" multiple="">
 				<?php foreach ($results['users'] as $user) { ?>
 					<option value="<?php echo $user->id ?>"<?php echo( $subcategory->id == $results['article']->subcategoryId ) ? " selected" : "" ?>><?php echo htmlspecialchars($user->name) ?></option>
 				<?php } ?>
