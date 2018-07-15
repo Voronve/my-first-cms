@@ -22,11 +22,6 @@ class Article {
 	public $title = null;
 
 	/**
-	 * @var int ID категории статьи
-	 */
-	public $categoryId = null;
-
-	/**
 	 * @var int ID подкатегории статьи 
 	 */
 	public $subcategoryId = null;
@@ -45,11 +40,6 @@ class Article {
 	 * @var int "активность статьи 1 или 0"
 	 */
 	public $active = null;
-	
-	/**
-	 * @var arr "Идентификаторы авторов статей" 
-	 */
-	public $authorsId = array();
 	
 	/**
 	 * Устанавливаем свойства с помощью значений в заданном массиве
@@ -103,12 +93,6 @@ class Article {
 			$this->active = (int) $data['active'];
 		} else {
 			$this->active = 0;
-		}
-		
-		if (isset($data['authorsId'])){
-			foreach ($data['authorsId'] as $authorId){
-				$this->authorsId[] = $authorId;
-			}
 		}
 	}
 
@@ -226,14 +210,14 @@ class Article {
 
 		// Вставляем статью
 		$conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
-		$sql = "INSERT INTO articles ( publicationDate, categoryId, title, summary, content, active ) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :title, :summary, :content, :active )";
+		$sql = "INSERT INTO articles ( publicationDate, title, summary, content, active, subcategoryId ) VALUES ( FROM_UNIXTIME(:publicationDate), :title, :summary, :content, :active, :subcategoryId )";
 		$st = $conn->prepare($sql);
 		$st->bindValue(":publicationDate", $this->publicationDate, PDO::PARAM_INT);
-		$st->bindValue(":categoryId", $this->categoryId, PDO::PARAM_INT);
 		$st->bindValue(":title", $this->title, PDO::PARAM_STR);
 		$st->bindValue(":summary", $this->summary, PDO::PARAM_STR);
 		$st->bindValue(":content", $this->content, PDO::PARAM_STR);
 		$st->bindValue(":active", $this->active, PDO::PARAM_INT);
+		$st->bindValue(":subcategoryId", $this->subcategoryId, PDO::PARAM_INT);
 		$st->execute();
 		$this->id = $conn->lastInsertId();
 		$conn = null;

@@ -129,6 +129,15 @@ function viewArticle()
     
     $results['subcategory'] = Subcategory::getById($results['article']->subcategoryId);
     $results['pageTitle'] = $results['article']->title . " | Простая CMS";
+	$connections = Connection::getById($articleId);
+	$connectionsCount = count($connections);
+	
+	foreach( $connections as $connection)
+	{
+		$userId = $connection->userId;
+		$results['authors'][] = User::getById($userId)->name;
+	}
+	
     
     require(TEMPLATE_PATH . "/viewArticle.php");
 }

@@ -24,8 +24,8 @@ class Connection
     */
 	
 	public function __construct( $data=array() ) {
-      if ( isset( $data['articleId'] ) ) $this->articleId = (int) $data['articleId'];
-      if ( isset( $data['userId'] ) ) $this->userId = $data['userId'];
+      if ( isset( $data['article_id'] ) ) $this->articleId = (int) $data['article_id'];
+      if ( isset( $data['user_id'] ) ) $this->userId = (int) $data['user_id'];
       
 	}
 	
@@ -48,12 +48,17 @@ class Connection
     * @return  Array|false Массив объектов Connection object или false, если записи не были найдены или в случае другой ошибки
     */
 
-    public static function getByArticleId( $articleId ) 
+    public static function getById( $articleId = null, $userId = null) 
     {
+		$selectByUser = $userId ? "AND user_id = :userId" : "";
+	
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "SELECT * FROM connections WHERE article_id = :article_id";
+        $sql = "SELECT * FROM connections WHERE article_id = :articleId " . $selectByUser;
         $st = $conn->prepare( $sql );
-        $st->bindValue(":article_id", $articleId, PDO::PARAM_INT);
+        $st->bindValue(":articleId", $articleId, PDO::PARAM_INT);
+		if($userId){
+			$st->bindValue(":userId", $userId, PDO::PARAM_INT);
+		}
         $st->execute();
 		$list = array();
 		while ($row = $st->fetch()){
@@ -114,16 +119,12 @@ class Connection
 
     public function insert() 
 	{
-
-      // У объекта Connection уже есть ID статьи и пользователя?
-      if ( !is_null( $this->article_id && $this->user_id ) ) trigger_error ( "Category::insert(): Attempt to insert a User object that already has its key properties set (to $this->article_id and $this->user_id).", E_USER_ERROR );
-
       // Вставляем новую связь 
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-      $sql = "INSERT INTO connections ( article_id, user_id) VALUES ( :article_id, :user_id )";
+      $sql = "INSERT INTO connections ( article_id, user_id) VALUES ( :articleId, :userId )";
       $st = $conn->prepare ( $sql );
-      $st->bindValue( ":article_id", $this->articleId, PDO::PARAM_INT );
-      $st->bindValue( ":user_id", $this->userId, PDO::PARAM_INT );
+      $st->bindValue( ":articleId", $this->articleId, PDO::PARAM_INT );
+      $st->bindValue( ":userId", $this->userId, PDO::PARAM_INT );
       $st->execute();
       $conn = null;
     }
@@ -156,16 +157,12 @@ class Connection
 
     public function delete() 
 	{
-
-      // У объекта User  есть ID?
-      if ( is_null( $this->article_id && $this->user_id ) ) trigger_error ( "Category::delete(): Attempt to delete a User object that does not have its its key properties set.", E_USER_ERROR );
-
       // Удаляем связь
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $st = $conn->prepare ( "DELETE FROM connections WHERE article_id = :article_id "
 			  . "AND user_id = :user_id LIMIT 1" );
       $st->bindValue( ":article_id", $this->articleId, PDO::PARAM_INT );
-	  $st->bindValue( ":article_id", $this->userId, PDO::PARAM_INT );
+	  $st->bindValue( ":user_id", $this->userId, PDO::PARAM_INT );
       $st->execute();
       $conn = null;
     }	

@@ -130,6 +130,10 @@ function newArticle() {
 //            print_r($_POST);
 //            echo "<pre>";
 //            В $_POST данные о статье сохраняются корректно
+        if ($_POST['categoryId'] != Subcategory::getById($_POST['subcategoryId'])->cat_id) {
+			header("Location: admin.php?error=CategoryNotMatch");
+			return;
+		}
 		// Пользователь получает форму редактирования статьи: сохраняем новую статью
 		$article = new Article();
 		$article->storeFormValues($_POST);
@@ -138,6 +142,17 @@ function newArticle() {
 //            echo "<pre>";
 //            А здесь данные массива $article уже неполные(есть только Число от даты, категория и полный текст статьи)          
 		$article->insert();
+		
+		//Сохраняем новые связи статья-авторы
+		$activeAuthorsId = $_POST['authorsId'];
+		$connection = 0;
+		foreach ($activeAuthorsId as $authorId) 
+		{
+			$connData['article_id'] = $article->id;
+			$connData['user_id'] = $authorId;
+			$connection = new Connection($connData);
+			$connection->insert($connData);
+		}
 		header("Location: admin.php?status=changesSaved");
 	} elseif (isset($_POST['cancel'])) {
 
@@ -149,6 +164,13 @@ function newArticle() {
 		$results['article'] = new Article;
 		$data = Category::getList();
 		$results['categories'] = $data['results'];
+		$data = Subcategory::getList();
+		$results['subcategories'] = $data['results'];
+		$data = User::getlist();
+		$results['users'] = $data['results'];
+		$results['authors'] = array();
+		//
+		$results['categoryIdCompare'] = null;
 		require( TEMPLATE_PATH . "/admin/editArticle.php" );
 	}
 }
@@ -161,6 +183,7 @@ function newArticle() {
 function editArticle() {
 
 	$results = array();
+	$activeAuthorsId = array();
 	$results['pageTitle'] = "Edit Article";
 	$results['formAction'] = "editArticle";
 
@@ -175,9 +198,22 @@ function editArticle() {
 			header("Location: admin.php?error=CategoryNotMatch");
 			return;
 		}
-
 		$article->storeFormValues($_POST);
 		$article->update();
+		
+		//Удалаем предыдущие связи  и устанавливаем новые
+		$connections = Connection::getById($article->id);
+		foreach ($connections as $connection){
+			$connection->delete();
+		}
+		$activeAuthorsId = $_POST['authorsId'];
+		$connection = 0;
+		foreach ($activeAuthorsId as $authorId) {
+			$connData['article_id'] = $article->id;
+			$connData['user_id'] = $authorId;
+			$connection = new Connection($connData);
+			$connection->insert();
+		}
 		header("Location: admin.php?status=changesSaved");
 	} elseif (isset($_POST['cancel'])) {
 
@@ -193,11 +229,17 @@ function editArticle() {
 		$results['categories'] = $data['results'];
 		$data = User::getlist();
 		$results['users'] = $data['results'];
+		$data = Connection::getById($results['article']->id);
+		$results['authors'] = array();
+		foreach($data as $connection){
+			$results['authors'][] = $connection->userId;
+		}
+		$results['categoryIdCompare'] = Subcategory::getById($results['article']->subcategoryId)->cat_id;
 		
-		
-		require(TEMPLATE_PATH . "/admin/editArticle.php");
 	}
+		require(TEMPLATE_PATH . "/admin/editArticle.php");
 }
+
 
 function deleteArticle() {
 

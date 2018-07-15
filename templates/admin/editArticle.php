@@ -17,7 +17,6 @@ echo "<pre>";
 	<?php } ?>
 
 	<ul>
-		div
 		<li>
 			<label for="title">Article Title</label>
 			<input type="text" name="title" id="title" placeholder="Name of the article" required autofocus maxlength="255" value="<?php echo htmlspecialchars($results['article']->title) ?>" />
@@ -36,26 +35,24 @@ echo "<pre>";
 		<li>
 			<label for="categoryId">Article Category</label>
 			<select name="categoryId">
-				<option value="0"<?php echo!$results['article']->subcategoryId ? " selected" : "" ?>>(none)</option>
 				<?php foreach ($results['categories'] as $category) { ?>
-					<option value="<?php echo $category->id ?>"<?php echo ( $category->id == Subcategory::getById($results['article']->subcategoryId)->cat_id ) ? " selected" : "" ?>><?php echo htmlspecialchars($category->name) ?></option>
+					<option value="<?php echo $category->id ?>"<?php echo ( $category->id == $results['categoryIdCompare'] ) ? " selected" : "" ?>><?php echo htmlspecialchars($category->name) ?></option>
 				<?php } ?>
 			</select>
 		</li>
 		<li>
 			<label for="subcategoryId">Article Subcategory</label>
 			<select name="subcategoryId">
-				<option value="0"<?php echo!$results['article']->subcategoryId ? " selected" : "" ?>>(none)</option>
 				<?php foreach ($results['subcategories'] as $subcategory) { ?>
 					<option value="<?php echo $subcategory->id ?>"<?php echo( $subcategory->id == $results['article']->subcategoryId ) ? " selected" : "" ?>><?php echo htmlspecialchars($subcategory->name) ?></option>
 				<?php } ?>
 			</select>
 		</li>
 		<li>
-			<label for="authorsNames[]">Authors names</label>
-			<select name="authorsNames[]" multiple="">
+			<label for="authorsId[]">Authors names</label>
+			<select name="authorsId[]" multiple="">
 				<?php foreach ($results['users'] as $user) { ?>
-					<option value="<?php echo $user->id ?>"<?php echo( $subcategory->id == $results['article']->subcategoryId ) ? " selected" : "" ?>><?php echo htmlspecialchars($user->name) ?></option>
+					<option value="<?php echo $user->id ?>"<?php foreach($results['authors'] as $author){ echo $user->id == $author ? " selected" : ""; } ?>><?php echo htmlspecialchars($user->name) ?></option>
 				<?php } ?>
 			</select>
 		</li>
